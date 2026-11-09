@@ -5,8 +5,12 @@ commit per fix. Each is reported upstream; a fix leaves this list once Blitz has
 
 | Commit | Fix | Upstream |
 |---|---|---|
+| `8047b2041` | A table's `cellspacing` and `cellpadding` attributes are read (presentational hints) | on `main`: [#1366](https://github.com/DioxusLabs/blitz/pull/1366) |
+| `039227343` | A resource whose URL can't be resolved is skipped instead of panicking | on `main`: [#1374](https://github.com/DioxusLabs/blitz/pull/1374) |
+| `ebc52fe5e` | A style sheet that fails to load no longer blocks layout (`NetHandler::error`) | on `main`: [#1318](https://github.com/DioxusLabs/blitz/pull/1318) |
 
-None yet.
+The three above are upstream's own fixes, backported to beta.4 (`git cherry-pick -x`); they
+leave this list with the next Blitz release.
 
 Gaps reported upstream that MailCraft still works around in its own crate (`crates/html`):
 [#1430](https://github.com/DioxusLabs/blitz/issues/1430) anonymous table boxes,
