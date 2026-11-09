@@ -60,7 +60,7 @@ fn failed_stylesheet_unblocks_rendering() {
         node.primary_styles()
             .unwrap()
             .get_inherited_box()
-            .slow_clone_visibility(),
+            .clone_visibility(),
         Visibility::Visible
     );
     assert!(node.final_layout().size.height > 0.0);
