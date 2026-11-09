@@ -11,6 +11,7 @@ commit per fix. Each is reported upstream; a fix leaves this list once Blitz has
 | `030d78f62` | A replaced element's set width or height stays beside a larger min size of the other axis (`min-width:300px; height:0` is 300×0) | reported: [#1433](https://github.com/DioxusLabs/blitz/issues/1433) |
 | `7926eccb7` | A table cell's `height` is the least it may be: its content makes it taller | reported: [#1431](https://github.com/DioxusLabs/blitz/issues/1431) |
 | `c6d01fd9b` | In automatic table layout, a percentage column gets its share of a table with a width (`minmax(min-content, N%)`) | reported: [#1435](https://github.com/DioxusLabs/blitz/issues/1435) |
+| `1ca8594d7` | `HtmlDocument::from_html_without_sniffing`: HTML parsed as HTML whatever its DOCTYPE (an XHTML DOCTYPE made it XML) | not reported yet |
 
 The first three are upstream's own fixes, backported to beta.4 (`git cherry-pick -x`); they
 leave this list with the next Blitz release.
