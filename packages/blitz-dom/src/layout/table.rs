@@ -199,6 +199,29 @@ fn percent_plus_length(
     dim.into()
 }
 
+/// A table wider than its columns shares the extra width out over them (CSS 2.2 §17.5.2): the
+/// columns `takes_extra` says absorb it (`auto` ones) when there are any; otherwise the columns
+/// with a length width do, in proportion to it, as `minmax(<width>, <width>fr)` (so a table
+/// narrower than its columns still leaves them their widths), as in Chrome.
+fn share_extra_width(
+    column_sizes: &mut [TrackSizingFunction],
+    takes_extra: impl Fn(&TrackSizingFunction) -> bool,
+) {
+    if column_sizes.iter().any(takes_extra) {
+        return;
+    }
+    let is_length = |column: &TrackSizingFunction| {
+        column.min.into_raw().tag() == taffy::CompactLength::LENGTH_TAG
+            && column.max.into_raw().tag() == taffy::CompactLength::LENGTH_TAG
+    };
+    for column in column_sizes.iter_mut().filter(|c| is_length(c)) {
+        let width = column.max.into_raw().value();
+        if width > 0.0 {
+            *column = style_helpers::minmax(style_helpers::length(width), style_helpers::fr(width));
+        }
+    }
+}
+
 pub(crate) fn build_table_context(
     doc: &mut BaseDocument,
     table_root_node_id: NodeId,
@@ -344,27 +367,9 @@ pub(crate) fn build_table_context(
             }
         }
 
-        // A table wider than its columns shares the extra width out over them: the `auto`
-        // columns take it (their `1fr`) when there are any; otherwise the columns with a
-        // length width do, in proportion to it, as `minmax(<width>, <width>fr)`.
-        let is_flexible = |column: &TrackSizingFunction| {
+        share_extra_width(&mut column_sizes, |column| {
             column.max.into_raw().tag() == taffy::CompactLength::FR_TAG
-        };
-        let is_length = |column: &TrackSizingFunction| {
-            column.min.into_raw().tag() == taffy::CompactLength::LENGTH_TAG
-                && column.max.into_raw().tag() == taffy::CompactLength::LENGTH_TAG
-        };
-        if !column_sizes.iter().any(is_flexible) {
-            for column in column_sizes.iter_mut().filter(|c| is_length(c)) {
-                let width = column.max.into_raw().value();
-                if width > 0.0 {
-                    *column = style_helpers::minmax(
-                        style_helpers::length(width),
-                        style_helpers::fr(width),
-                    );
-                }
-            }
-        }
+        });
     } else if resolves_percentages {
         // In the automatic table layout algorithm, a percentage column gets its share of the
         // table but no less than its content needs, and `auto` columns share out what's left.
@@ -384,6 +389,10 @@ pub(crate) fn build_table_context(
                 *column = at_least_content(percent_track(percent, extra));
             }
         }
+
+        // As in the fixed layout: a table with a width wider than its columns gives the extra
+        // to its `auto` columns, or, with none, to the columns with a length width.
+        share_extra_width(&mut column_sizes, |column| column.max.is_auto());
     }
 
     style.grid_template_columns = column_sizes.into_iter().map(|dim| dim.into()).collect();

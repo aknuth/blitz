@@ -66,6 +66,7 @@ mod style_property_invalidation;
 mod svg_attr_sizing;
 mod svg_background_size;
 mod table_align_center;
+mod table_auto_extra_width;
 mod table_cell_height;
 mod table_fixed_extra_width;
 mod table_percent_columns;
