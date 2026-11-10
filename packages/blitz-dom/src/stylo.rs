@@ -1002,7 +1002,20 @@ impl<'a> TElement for BlitzNode<'a> {
                 }
             }
 
-            if *name == local_name!("align") {
+            // On a table, `align` places the table itself rather than aligning its
+            // text: `center` maps to auto inline margins (`left`/`right` float it,
+            // in the UA style sheet).
+            // https://html.spec.whatwg.org/multipage/rendering.html#tables-2
+            if *name == local_name!("align")
+                && *tag == local_name!("table")
+                && elem.name.ns == ns!(html)
+            {
+                if value.trim().eq_ignore_ascii_case("center") {
+                    use style::values::generics::length::GenericMargin;
+                    push_style(PropertyDeclaration::MarginLeft(GenericMargin::Auto));
+                    push_style(PropertyDeclaration::MarginRight(GenericMargin::Auto));
+                }
+            } else if *name == local_name!("align") {
                 use style::values::specified::TextAlign;
                 let keyword = match value {
                     "left" => Some(StyloTextAlign::MozLeft),
