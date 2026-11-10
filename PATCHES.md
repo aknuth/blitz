@@ -13,6 +13,9 @@ commit per fix. Each is reported upstream; a fix leaves this list once Blitz has
 | `c6d01fd9b` | In automatic table layout, a percentage column gets its share of a table with a width (`minmax(min-content, N%)`) | reported: [#1435](https://github.com/DioxusLabs/blitz/issues/1435) |
 | `1ca8594d7` | `HtmlDocument::from_html_without_sniffing`: HTML parsed as HTML whatever its DOCTYPE (an XHTML DOCTYPE made it XML) | reported: [#1483](https://github.com/DioxusLabs/blitz/issues/1483) |
 | `b60101fdb` | In fixed table layout, columns with a length width share out a wider table's extra width when no column is `auto` | reported: [#1484](https://github.com/DioxusLabs/blitz/issues/1484) |
+| `50e283f35` | A table's `align="center"` centres the table (auto inline margins), not its text | to be reported |
+| `48cb63938` | `bgcolor` is read as an HTML legacy colour: names (`white`) and `#rgb` with doubled digits | to be reported |
+| `6b09479c5` | In automatic table layout too, columns with a length width share out a wider table's extra width when no column is `auto` | to be reported |
 
 The first three are upstream's own fixes, backported to beta.4 (`git cherry-pick -x`); they
 leave this list with the next Blitz release.
