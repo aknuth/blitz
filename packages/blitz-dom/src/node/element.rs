@@ -58,6 +58,10 @@ pub struct ElementData {
     /// The element's parsed style attribute (used by stylo)
     pub style_attribute: Option<ServoArc<Locked<PropertyDeclarationBlock>>>,
 
+    /// The `background` attribute of a `body` or table element as the
+    /// `background-image` it's a presentational hint for (used by stylo).
+    pub background_attribute: Option<ServoArc<Locked<PropertyDeclarationBlock>>>,
+
     /// Heterogeneous data that depends on the element's type.
     /// For example:
     ///   - The image data for \<img\> elements.
@@ -303,6 +307,7 @@ impl Clone for ElementData {
             attrs: self.attrs.clone(),
             is_focussable: self.is_focussable,
             style_attribute: self.style_attribute.clone(),
+            background_attribute: self.background_attribute.clone(),
             special_data: self.special_data.clone(),
             background_images: self.background_images.clone(),
             mask_images: self.mask_images.clone(),
@@ -411,6 +416,7 @@ impl ElementData {
             attrs: Attributes::new(attrs),
             is_focussable: false,
             style_attribute: Default::default(),
+            background_attribute: Default::default(),
             inline_layout_data: None,
             list_item_data: None,
             special_data: SpecialElementData::None,
@@ -675,6 +681,59 @@ impl ElementData {
                 CssRuleType::Style,
             )))
         });
+        self.background_attribute = self.background_hint(guard, url_extra_data);
+    }
+
+    /// The `background` attribute of `body`, `table`, `thead`, `tbody`,
+    /// `tfoot`, `tr`, `td` and `th` as a presentational hint: its URL,
+    /// resolved against the document's, is the element's `background-image`.
+    /// An empty value is no hint.
+    /// https://html.spec.whatwg.org/multipage/rendering.html#tables-2
+    fn background_hint(
+        &self,
+        guard: &SharedRwLock,
+        url_extra_data: &UrlExtraData,
+    ) -> Option<ServoArc<Locked<PropertyDeclarationBlock>>> {
+        let takes_background = matches!(
+            self.name.local,
+            local_name!("body")
+                | local_name!("table")
+                | local_name!("thead")
+                | local_name!("tbody")
+                | local_name!("tfoot")
+                | local_name!("tr")
+                | local_name!("td")
+                | local_name!("th")
+        );
+        if !takes_background {
+            return None;
+        }
+        let url = self.attr(local_name!("background"))?.trim();
+        if url.is_empty() {
+            return None;
+        }
+        // The URL as a CSS string: a quote, a backslash or a line break in it
+        // is escaped, so it can't end the string early.
+        let mut quoted = String::with_capacity(url.len() + 2);
+        quoted.push('"');
+        for c in url.chars() {
+            match c {
+                '"' | '\\' => {
+                    quoted.push('\\');
+                    quoted.push(c);
+                }
+                '\n' | '\r' | '\u{c}' => quoted.push_str("\\a "),
+                _ => quoted.push(c),
+            }
+        }
+        quoted.push('"');
+        Some(ServoArc::new(guard.wrap(parse_style_attribute(
+            &format!("background-image: url({quoted})"),
+            url_extra_data,
+            None,
+            QuirksMode::NoQuirks,
+            CssRuleType::Style,
+        ))))
     }
 
     pub fn set_style_property(

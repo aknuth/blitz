@@ -11,6 +11,7 @@ mod anonymous_block_leak;
 mod anonymous_block_percentage_height;
 mod anonymous_block_restyle;
 mod autofocus_attribute;
+mod background_attribute;
 mod background_size;
 mod bgcolor_legacy_colour;
 mod br_trailing_line;

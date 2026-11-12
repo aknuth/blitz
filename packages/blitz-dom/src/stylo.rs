@@ -879,6 +879,14 @@ impl<'a> TElement for BlitzNode<'a> {
 
         let tag = &elem.name.local;
 
+        if let Some(background) = &elem.background_attribute {
+            hints.push(ApplicableDeclarationBlock::from_declarations(
+                background.clone(),
+                CascadeLevel::new(CascadeOrigin::PresHints),
+                LayerOrder::root(),
+            ));
+        }
+
         let mut push_style = |decl: PropertyDeclaration| {
             hints.push(ApplicableDeclarationBlock::from_declarations(
                 Arc::new(
