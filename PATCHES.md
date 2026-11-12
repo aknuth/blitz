@@ -16,6 +16,7 @@ commit per fix. Each is reported upstream; a fix leaves this list once Blitz has
 | `50e283f35` | A table's `align="center"` centres the table (auto inline margins), not its text | to be reported |
 | `48cb63938` | `bgcolor` is read as an HTML legacy colour: names (`white`) and `#rgb` with doubled digits | to be reported |
 | `6b09479c5` | In automatic table layout too, columns with a length width share out a wider table's extra width when no column is `auto` | to be reported |
+| `1ce8efdf2` | The `background` attribute of `body` and the table elements is a presentational hint for `background-image` | to be reported |
 
 The first three are upstream's own fixes, backported to beta.4 (`git cherry-pick -x`); they
 leave this list with the next Blitz release.
